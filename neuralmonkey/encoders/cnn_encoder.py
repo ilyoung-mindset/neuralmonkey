@@ -143,19 +143,19 @@ class CNNEncoder(ModelPart, Attentive):
                     activation=tf.nn.relu,
                     dropout_plc=self.dropout_placeholder)
 
-            self.__attention_tensor = tf.reshape(
+            self._attention_tensor = tf.reshape(
                 last_layer, [-1, last_width * last_height, last_n_channels])
 
-            self.__attention_mask = tf.reshape(
+            self._attention_mask = tf.reshape(
                 last_padding_masks, [-1, last_width * last_height])
 
     @property
-    def _attention_tensor(self) -> tf.Tensor:
-        return self.__attention_tensor
+    def attention_tensor(self) -> tf.Tensor:
+        return self._attention_tensor
 
     @property
-    def _attention_mask(self) -> tf.Tensor:
-        return self.__attention_mask
+    def attention_mask(self) -> tf.Tensor:
+        return self._attention_mask
 
     def feed_dict(self, dataset: Dataset, train: bool=False) -> FeedDict:
         # if it is from the pickled file, it is list, not numpy tensor,

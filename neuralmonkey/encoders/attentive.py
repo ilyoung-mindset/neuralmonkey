@@ -26,13 +26,13 @@ class Attentive(metaclass=ABCMeta):
             name = str(self)
 
         return self._attention_type(
-            self._attention_tensor,
+            self.attention_tensor,
             scope="attention_{}".format(name),
             input_weights=self._attention_mask,
             **self._attention_kwargs) if self._attention_type else None
 
     @abstractproperty
-    def _attention_tensor(self):
+    def attention_tensor(self):
         """Tensor over which the attention is done."""
         raise NotImplementedError(
             "Attentive object is missing attention_tensor.")
@@ -40,4 +40,4 @@ class Attentive(metaclass=ABCMeta):
     @property
     def _attention_mask(self):
         """Zero/one masking the attention logits."""
-        return tf.ones(tf.shape(self._attention_tensor)[:-1])
+        return tf.ones(tf.shape(self.attention_tensor)[:-1])

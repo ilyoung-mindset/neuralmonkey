@@ -90,15 +90,15 @@ class PostCNNImageEncoder(ModelPart, Attentive):
 
             self.encoded = tf.tanh(tf.matmul(self.flat, project_w) + project_b)
 
-            self.__attention_tensor = tf.reshape(
+            self._attention_tensor = tf.reshape(
                 self.image_features,
                 [-1, input_shape[0] * input_shape[1],
                  input_shape[2]],
                 name="flatten_image")
 
     @property
-    def _attention_tensor(self):
-        return self.__attention_tensor
+    def attention_tensor(self):
+        return self._attention_tensor
 
     def feed_dict(self, dataset: Dataset, train: bool=False) -> FeedDict:
         res = {}  # type: FeedDict

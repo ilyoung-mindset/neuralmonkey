@@ -100,7 +100,7 @@ class SentenceEncoder(ModelPart, Attentive):
             self.hidden_states = tf.concat(outputs_bidi_tup, 2)
 
             with tf.variable_scope('attention_tensor'):
-                self.__attention_tensor = self._dropout(
+                self._attention_tensor = self._dropout(
                     self.hidden_states)
 
             self.encoded = tf.concat(encoded_tup, 1)
@@ -108,12 +108,11 @@ class SentenceEncoder(ModelPart, Attentive):
         log("Sentence encoder initialized")
 
     @property
-    def _attention_tensor(self):
-        return self.__attention_tensor
+    def attention_tensor(self):
+        return self._attention_tensor
 
     @property
-    def _attention_mask(self):
-        # TODO tohle je proti OOP prirode
+    def attention_mask(self):
         return self.input_mask
 
     @property

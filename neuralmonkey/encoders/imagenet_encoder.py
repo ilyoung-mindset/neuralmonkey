@@ -132,7 +132,7 @@ class ImageNet(ModelPart, Attentive):
                 # pylint: disable=no-member
                 shape = [s.value for s in net_output.get_shape()[1:]]
                 # pylint: enable=no-member
-                self.__attention_tensor = tf.reshape(
+                self._attention_tensor = tf.reshape(
                     net_output, [-1, shape[0] * shape[1], shape[2]])
 
             if encoded_layer is not None:
@@ -159,8 +159,8 @@ class ImageNet(ModelPart, Attentive):
                     var_list=local_variables + slim_variables)
 
     @property
-    def _attention_tensor(self) -> tf.Tensor:
-        return self.__attention_tensor
+    def attention_tensor(self) -> tf.Tensor:
+        return self._attention_tensor
 
     def feed_dict(self, dataset: Dataset, train: bool=False) -> FeedDict:
         images = np.array(dataset.get_series(self.data_id))
