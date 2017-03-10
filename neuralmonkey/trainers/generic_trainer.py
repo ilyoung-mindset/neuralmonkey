@@ -41,7 +41,8 @@ class GenericTrainer(object):
                 l2_cost = l2_weight * l2_value if l2_weight > 0 else 0.0
 
             # unweighted losses for fetching
-            self.losses = [o.loss for o in objectives] + [l1_value, l2_value]
+            self.losses = [
+                o.weight * o.loss for o in objectives] + [l1_value, l2_value]
             tf.summary.scalar('train_l1', l1_value,
                               collections=["summary_train"])
             tf.summary.scalar('train_l2', l2_value,
