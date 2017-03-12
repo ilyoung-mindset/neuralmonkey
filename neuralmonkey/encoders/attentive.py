@@ -38,6 +38,6 @@ class Attentive(metaclass=ABCMeta):
             "Attentive object is missing attention_tensor.")
 
     @property
-    def _attention_mask(self):
+    def attention_mask(self):
         """Zero/one masking the attention logits."""
         return tf.ones(tf.shape(self.attention_tensor)[:-1])
