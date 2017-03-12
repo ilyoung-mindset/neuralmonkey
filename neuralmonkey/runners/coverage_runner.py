@@ -14,11 +14,13 @@ from neuralmonkey.runners.base_runner import (BaseRunner, Executable,
 class CoverageExecutable(Executable):
     def __init__(self,
                  all_coders: List[ModelPart],
+                 mask: tf.Tensor,
                  coverage: tf.Tensor,
                  fertility: Optional[tf.Tensor]) -> None:
         self._all_coders = all_coders
 
-        self._fetches = {"coverage": coverage}
+        self._fetches = {"coverage": coverage,
+                         "mask": mask}
         if fertility is not None:
             self._fetches["fertility"] = fertility
 
@@ -29,6 +31,7 @@ class CoverageExecutable(Executable):
 
     def collect_results(self, results: List[Dict]) -> None:
         coverage = results[0]["coverage"]
+        masks = results[0]["mask"]
         if "fertility" in results[0]:
             fertility = results[0]["fertility"]
         else:
@@ -45,9 +48,16 @@ class CoverageExecutable(Executable):
         coverage_loss = np.mean(np.square(coverage - fertility))
 
         output = []
-        for sent_coverage, sent_fertility in zip(coverage.tolist(),
-                                                 fertility.tolist()):
-            output.append(list(zip(sent_coverage, sent_fertility)))
+        for sent_coverage, sent_fertility, mask in zip(
+                coverage.tolist(), fertility.tolist(), masks.tolist()):
+            sent_list = []
+            for coverage, fertility, weight in zip(
+                    sent_coverage, sent_fertility, mask):
+                if weight != 0:
+                    sent_list.append("{:.2f}/{:.2f}".format(
+                        coverage, fertility))
+
+            output.append(sent_list)
 
         self.result = ExecutionResult(
             outputs=output,
@@ -66,6 +76,7 @@ class CoverageRunner(BaseRunner):
 
         self._coverage = compute_coverage(
             "coverage_{}".format(output_series), encoder, decoder)
+        self._attention_mask = encoder.attention_mask
         if fertility is not None:
             self._fertility = fertility.fertilities
         else:
@@ -73,8 +84,8 @@ class CoverageRunner(BaseRunner):
 
     def get_executable(self, compute_losses=False,
                        summaries=True) -> CoverageExecutable:
-        return CoverageExecutable(self.all_coders, self._coverage,
-                                  self._fertility)
+        return CoverageExecutable(self.all_coders, self._attention_mask,
+                                  self._coverage, self._fertility)
 
     @property
     def loss_names(self) -> List[str]:

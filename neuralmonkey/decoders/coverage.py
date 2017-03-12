@@ -60,8 +60,12 @@ def coverage_objective(
     coverage = compute_coverage(name, encoder, decoder)
 
     if fertility_model is not None:
-        loss = tf.square(fertility_model.fertilities - coverage)
+        raw_loss = tf.square(fertility_model.fertilities - coverage)
     else:
-        loss = tf.square(1 - coverage)
+        raw_loss = tf.square(1 - coverage)
+
+    loss = tf.reduce_sum(
+        raw_loss * encoder.attention_mask) / tf.reduce_sum(
+            encoder.attention_mask)
 
     return Objective(name, decoder, loss, None, weight)
