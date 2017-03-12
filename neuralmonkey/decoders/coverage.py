@@ -31,6 +31,25 @@ class FertilityModel(ModelPart):
         return {}
 
 
+def compute_coverage(name: str, encoder: ModelPart,
+                     decoder: ModelPart) -> tf.Tensor:
+    with tf.variable_scope(name):
+        attn_object = decoder.get_attention_object(encoder, train_mode=True)
+
+        # batch x decoder time
+        output_padding = tf.expand_dims(
+            tf.transpose(decoder.train_padding, perm=[1, 0]), -1)
+
+        # batch x decoder time x encoder time
+        alignments = tf.transpose(
+            tf.pack(attn_object.attentions_in_time), perm=[1, 0, 2])
+
+        # mask out what is not in decoder and sum over the decoder time
+        #  => we get encoder coverage
+        coverage = tf.reduce_sum(alignments * output_padding, 1)
+        return coverage
+
+
 def coverage_objective(
         name: str,
         encoder: ModelPart,
@@ -38,19 +57,7 @@ def coverage_objective(
         weight: float,
         fertility_model: Optional[FertilityModel]) -> Objective:
 
-    attn_object = decoder.get_attention_object(encoder, train_mode=True)
-
-    # batch x decoder time
-    output_padding = tf.expand_dims(
-        tf.transpose(decoder.train_padding, perm=[1, 0]), -1)
-
-    # batch x decoder time x encoder time
-    alignments = tf.transpose(
-        tf.pack(attn_object.attentions_in_time), perm=[1, 0, 2])
-
-    # mask out what is not in decoder and sum over the decoder time
-    #  => we get encoder coverage
-    coverage = tf.reduce_sum(alignments * output_padding, 1)
+    coverage = compute_coverage(name, encoder, decoder)
 
     if fertility_model is not None:
         loss = tf.square(fertility_model.fertilities - coverage)
