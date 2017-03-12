@@ -31,8 +31,8 @@ class FertilityModel(ModelPart):
         return {}
 
 
-def compute_coverage(name: str, encoder: ModelPart,
-                     decoder: ModelPart) -> tf.Tensor:
+def compute_coverage(name: str, encoder: Attentive,
+                     decoder: Decoder) -> tf.Tensor:
     with tf.variable_scope(name):
         attn_object = decoder.get_attention_object(encoder, train_mode=True)
 
@@ -52,7 +52,7 @@ def compute_coverage(name: str, encoder: ModelPart,
 
 def coverage_objective(
         name: str,
-        encoder: ModelPart,
+        encoder: Attentive,
         decoder: Decoder,
         weight: float,
         fertility_model: Optional[FertilityModel]) -> Objective:

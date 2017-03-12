@@ -1,8 +1,9 @@
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 import numpy as np
 import tensorflow as tf
 
+from neuralmonkey.encoders.attentive import Attentive
 from neuralmonkey.decoders.decoder import Decoder
 from neuralmonkey.decoders.coverage import FertilityModel, compute_coverage
 from neuralmonkey.model.model_part import ModelPart
@@ -12,7 +13,7 @@ from neuralmonkey.runners.base_runner import (BaseRunner, Executable,
 
 class CoverageExecutable(Executable):
     def __init__(self,
-                 all_coders: Set[ModelPart],
+                 all_coders: List[ModelPart],
                  coverage: tf.Tensor,
                  fertility: Optional[tf.Tensor]) -> None:
         self._all_coders = all_coders
@@ -21,7 +22,7 @@ class CoverageExecutable(Executable):
         if fertility is not None:
             self._fetches["fertility"] = fertility
 
-        self.result = None  # type: Option[ExecutionResult]
+        self.result = None  # type: Optional[ExecutionResult]
 
     def next_to_execute(self) -> NextExecute:
         return self._all_coders, self._fetches, {}
@@ -59,7 +60,7 @@ class CoverageRunner(BaseRunner):
     def __init__(self,
                  output_series: str,
                  decoder: Decoder,
-                 encoder: ModelPart,
+                 encoder: Attentive,
                  fertility: Optional[FertilityModel]) -> None:
         super(CoverageRunner, self).__init__(output_series, decoder)
 
