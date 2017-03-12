@@ -28,7 +28,7 @@ class Attentive(metaclass=ABCMeta):
         return self._attention_type(
             self.attention_tensor,
             scope="attention_{}".format(name),
-            input_weights=self._attention_mask,
+            input_weights=self.attention_mask,
             **self._attention_kwargs) if self._attention_type else None
 
     @abstractproperty
