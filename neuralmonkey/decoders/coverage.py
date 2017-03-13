@@ -42,7 +42,7 @@ def compute_coverage(name: str, encoder: Attentive,
 
         # batch x decoder time x encoder time
         alignments = tf.transpose(
-            tf.pack(attn_object.attentions_in_time), perm=[1, 0, 2])
+            tf.stack(attn_object.attentions_in_time), perm=[1, 0, 2])
 
         # mask out what is not in decoder and sum over the decoder time
         #  => we get encoder coverage
